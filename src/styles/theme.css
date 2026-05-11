@@ -1,0 +1,200 @@
+/* ─── CSS Custom Properties ──────────────────────────────────────────────────
+   Edit values here to change the entire app appearance.
+   These variables are referenced by tailwind.config.js via var(--token).
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --font-size: 16px;
+
+  /* BASE */
+  --background: #f4f4f5;
+  --foreground: #18181b;
+
+  --card: #ffffff;
+  --card-foreground: #18181b;
+
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+
+  /* BRAND */
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+
+  --secondary: #e4e4e7;
+  --secondary-foreground: #27272a;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #52525b;
+
+  --accent: #ede9fe;
+  --accent-foreground: #6d28d9;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* INPUTS */
+  --border: #d4d4d8;
+
+  --input: #ffffff;
+  --input-background: #ffffff;
+
+  --switch-background: #8b5cf6;
+
+  --ring: #8b5cf6;
+
+  /* CHARTS */
+  --chart-1: #8b5cf6;
+  --chart-2: #a78bfa;
+  --chart-3: #c4b5fd;
+  --chart-4: #7c3aed;
+  --chart-5: #38bdf8;
+  --chart-6: #f59e0b;
+  --chart-7: #f472b6;
+
+  --radius: 1rem;
+
+  /* SIDEBAR */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #18181b;
+
+  --sidebar-primary: #8b5cf6;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #ede9fe;
+  --sidebar-accent-foreground: #6d28d9;
+
+  --sidebar-border: #d4d4d8;
+
+  --sidebar-ring: #8b5cf6;
+}
+
+.dark {
+  /* ========= BASE ========= */
+
+  --background: #18181b;
+  --foreground: #f4f4f5;
+
+  --card: #27272a;
+  --card-foreground: #f4f4f5;
+
+  --popover: #27272a;
+  --popover-foreground: #f4f4f5;
+
+  /* ========= BRAND ========= */
+
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+
+  --secondary: #3f3f46;
+  --secondary-foreground: #f4f4f5;
+
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+
+  --accent: #3f3f46;
+  --accent-foreground: #c4b5fd;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* ========= INPUTS / BORDERS ========= */
+
+  --border: rgba(255, 255, 255, 0.08);
+
+  --input: rgba(255, 255, 255, 0.06);
+  --input-background: #27272a;
+
+  --switch-background: #8b5cf6;
+
+  --ring: #8b5cf6;
+
+  /* ========= TYPOGRAPHY ========= */
+
+  --font-weight-medium: 500;
+  --font-weight-normal: 300;
+
+  /* ========= CHARTS ========= */
+  /* Agora coerentes com a identidade violeta/zinc */
+
+  --chart-1: #8b5cf6; /* violeta principal */
+  --chart-2: #a78bfa; /* violeta secundário */
+  --chart-3: #38bdf8; /* azul suave */
+  --chart-4: #22c55e; /* verde */
+  --chart-5: #f59e0b; /* âmbar */
+  --chart-6: #f472b6; /* rosa */
+  --chart-7: #f87171; /* vermelho suave */
+
+  /* ========= SIDEBAR ========= */
+
+  --sidebar: #18181b;
+  --sidebar-foreground: #f4f4f5;
+
+  --sidebar-primary: #8b5cf6;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #c4b5fd;
+
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+
+  --sidebar-ring: #8b5cf6;
+}
+
+/* ─── Base layer ─────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+    outline-color: var(--ring);
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+
+    font-family: "Inter", sans-serif;
+    font-weight: 300;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+  h2 {
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+  h3 {
+    font-size: 1.125rem;
+    line-height: 1.3;
+  }
+  h4 {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  p,
+  span,
+  label,
+  input,
+  textarea,
+  button {
+    font-family: "Inter", sans-serif;
+  }
+}
