@@ -250,9 +250,8 @@ export function AppLayout() {
           <div className="relative">
             <button
               onClick={() => {
-                setUserMenuOpen(!userMenuOpen);
-                setNotifOpen(false);
-              }}
+              setUserMenuOpen(!userMenuOpen);
+            }}
               className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-accent transition-colors"
             >
               {currentUser?.avatar ? (
@@ -286,7 +285,7 @@ export function AppLayout() {
                   className="fixed inset-0 z-10"
                   onClick={() => setUserMenuOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-card rounded-xl shadow-lg border border-border z-20 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-48 bg-card rounded-xl shadow-lg border border-border z-20 overflow-hidden sm:right-0 max-sm:-right-3">
                   <div className="px-4 py-3 border-b border-border">
                     <p
                       className="text-sm text-foreground"

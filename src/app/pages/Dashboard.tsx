@@ -321,15 +321,16 @@ export function DashboardPage() {
             })}
           </p>
         </div>
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <button
             onClick={() => setNewMenuOpen((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary dark:bg-primary text-white hover:bg-primary/90 dark:hover:bg-violet-600 transition-colors text-sm"
+            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-primary dark:bg-primary text-white hover:bg-primary/90 dark:hover:bg-violet-600 transition-colors text-xs sm:text-sm"
             style={{ fontWeight: 600 }}
           >
             <Plus className="w-4 h-4" />
-            Novo lançamento
-            <ChevronDown className="w-3.5 h-3.5 ml-0.5" />
+            <span className="hidden xs:inline">Novo lançamento</span>
+            <span className="inline xs:hidden">Novo</span>
+            <ChevronDown className="w-3.5 h-3.5" />
           </button>
           {newMenuOpen && (
             <>
@@ -337,7 +338,7 @@ export function DashboardPage() {
                 className="fixed inset-0 z-10"
                 onClick={() => setNewMenuOpen(false)}
               />
-              <div className="absolute right-0 mt-2 w-44 bg-card rounded-xl shadow-lg border border-border z-20 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-44 bg-card rounded-xl shadow-lg border border-border z-20 overflow-hidden sm:right-0 max-sm:right-auto max-sm:left-0">
                 <button
                   onClick={() => {
                     navigate("/income");

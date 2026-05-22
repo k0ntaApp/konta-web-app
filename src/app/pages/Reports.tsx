@@ -73,16 +73,26 @@ export function ReportsPage() {
   };
 
   const filteredExpenses = useMemo(() => {
+    if (!startDate || !endDate) return [];
+    const start = new Date(startDate + 'T00:00:00');
+    const end = new Date(endDate + 'T23:59:59.999');
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
+
     return expenses.filter(e => {
       const date = new Date(e.date);
-      return date >= new Date(startDate) && date <= new Date(endDate);
+      return date >= start && date <= end;
     });
   }, [expenses, startDate, endDate]);
 
   const filteredIncomes = useMemo(() => {
+    if (!startDate || !endDate) return [];
+    const start = new Date(startDate + 'T00:00:00');
+    const end = new Date(endDate + 'T23:59:59.999');
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
+
     return incomes.filter(i => {
       const date = new Date(i.date);
-      return date >= new Date(startDate) && date <= new Date(endDate);
+      return date >= start && date <= end;
     });
   }, [incomes, startDate, endDate]);
 
@@ -106,31 +116,61 @@ export function ReportsPage() {
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
   }, [filteredIncomes]);
 
-  const dailyData = useMemo(() => {
-    const map: Record<string, { income: number; expense: number }> = {};
+  const daysCount = useMemo(() => {
+    if (!startDate || !endDate) return 1;
     const start = new Date(startDate);
     const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 1;
+    const diffTime = end.getTime() - start.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return Math.max(1, diffDays);
+  }, [startDate, endDate]);
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const key = d.toISOString().split("T")[0];
-      map[key] = { income: 0, expense: 0 };
-    }
+  const dailyData = useMemo(() => {
+    if (!startDate || !endDate) return [];
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return [];
+
+    const map: Record<string, { income: number; expense: number }> = {};
 
     filteredExpenses.forEach(e => {
-      const key = new Date(e.date).toISOString().split("T")[0];
-      if (map[key]) map[key].expense += e.amount;
+      if (!e.date) return;
+      const d = new Date(e.date);
+      if (isNaN(d.getTime())) return;
+      const key = d.toISOString().split("T")[0];
+      if (!map[key]) {
+        map[key] = { income: 0, expense: 0 };
+      }
+      map[key].expense += e.amount;
     });
 
     filteredIncomes.forEach(i => {
-      const key = new Date(i.date).toISOString().split("T")[0];
-      if (map[key]) map[key].income += i.amount;
+      if (!i.date) return;
+      const d = new Date(i.date);
+      if (isNaN(d.getTime())) return;
+      const key = d.toISOString().split("T")[0];
+      if (!map[key]) {
+        map[key] = { income: 0, expense: 0 };
+      }
+      map[key].income += i.amount;
     });
 
-    return Object.entries(map).map(([date, data]) => ({
-      date,
-      ...data,
-    }));
+    return Object.entries(map)
+      .map(([date, data]) => ({
+        date,
+        ...data,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
   }, [filteredExpenses, filteredIncomes, startDate, endDate]);
+
+  const formattedPeriodText = useMemo(() => {
+    if (!startDate || !endDate) return "";
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return "";
+    return `Período: ${start.toLocaleDateString("pt-BR")} a ${end.toLocaleDateString("pt-BR")}`;
+  }, [startDate, endDate]);
 
   const handlePrint = () => {
     window.print();
@@ -239,52 +279,52 @@ export function ReportsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {(reportType === "all" || reportType === "income") && (
-          <div className="bg-card dark:bg-card rounded-2xl p-4 border border-border dark:border-white/[0.06] shadow-sm">
-            <p className="text-xs text-muted-foreground mb-1">Receitas</p>
-            <p className="text-xl text-primary" style={{ fontWeight: 700 }}>
-              {formatCurrency(totalIncomes)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {filteredIncomes.length} registros
-            </p>
-          </div>
-        )}
-        {(reportType === "all" || reportType === "expense") && (
-          <div className="bg-card dark:bg-card rounded-2xl p-4 border border-border dark:border-white/[0.06] shadow-sm">
-            <p className="text-xs text-muted-foreground mb-1">Despesas</p>
-            <p className="text-xl text-red-500" style={{ fontWeight: 700 }}>
-              {formatCurrency(totalExpenses)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {filteredExpenses.length} registros
-            </p>
-          </div>
-        )}
-        {reportType === "all" && (
-          <>
+        <div className={`grid grid-cols-2 ${reportType === "all" ? "md:grid-cols-4" : "md:grid-cols-2"} gap-4 mb-6`}>
+          {(reportType === "all" || reportType === "income") && (
             <div className="bg-card dark:bg-card rounded-2xl p-4 border border-border dark:border-white/[0.06] shadow-sm">
-              <p className="text-xs text-muted-foreground mb-1">Saldo</p>
-              <p className="text-xl" style={{ fontWeight: 700, color: balance >= 0 ? "#16a34a" : "#ef4444" }}>
-                {formatCurrency(Math.abs(balance))}
+              <p className="text-xs text-muted-foreground mb-1">Receitas</p>
+              <p className="text-xl text-primary truncate" style={{ fontWeight: 700 }}>
+                {formatCurrency(totalIncomes)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {balance >= 0 ? "Positivo" : "Negativo"}
+                {filteredIncomes.length} registros
               </p>
             </div>
+          )}
+          {(reportType === "all" || reportType === "expense") && (
             <div className="bg-card dark:bg-card rounded-2xl p-4 border border-border dark:border-white/[0.06] shadow-sm">
-              <p className="text-xs text-muted-foreground mb-1">Média diária</p>
-              <p className="text-xl text-foreground" style={{ fontWeight: 700 }}>
-                {formatCurrency((totalExpenses + totalIncomes) / Math.max(dailyData.length, 1))}
+              <p className="text-xs text-muted-foreground mb-1">Despesas</p>
+              <p className="text-xl text-red-500 truncate" style={{ fontWeight: 700 }}>
+                {formatCurrency(totalExpenses)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {dailyData.length} dias
+                {filteredExpenses.length} registros
               </p>
             </div>
-          </>
-        )}
-      </div>
+          )}
+          {reportType === "all" && (
+            <>
+              <div className="bg-card dark:bg-card rounded-2xl p-4 border border-border dark:border-white/[0.06] shadow-sm">
+                <p className="text-xs text-muted-foreground mb-1">Saldo</p>
+                <p className="text-xl truncate" style={{ fontWeight: 700, color: balance >= 0 ? "#16a34a" : "#ef4444" }}>
+                  {formatCurrency(Math.abs(balance))}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {balance >= 0 ? "Positivo" : "Negativo"}
+                </p>
+              </div>
+              <div className="bg-card dark:bg-card rounded-2xl p-4 border border-border dark:border-white/[0.06] shadow-sm">
+                <p className="text-xs text-muted-foreground mb-1">Média diária</p>
+                <p className="text-xl text-foreground truncate" style={{ fontWeight: 700 }}>
+                  {formatCurrency((totalExpenses + totalIncomes) / Math.max(daysCount, 1))}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {daysCount} {daysCount === 1 ? "dia" : "dias"}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
 
       {/* Report Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -373,10 +413,10 @@ export function ReportsPage() {
               <tr className="border-b border-border dark:border-white/[0.06]">
                 <th className="text-left py-2 text-xs text-muted-foreground uppercase" style={{ fontWeight: 600 }}>Data</th>
                 {reportType !== "expense" && (
-                  <th className="text-right py-2 text-xs text-muted-foreground uppercase" style={{ fontWeight: 600 }}>Receitas</th>
+                  <th className="text-right py-2 text-xs text-muted-foreground uppercase hidden sm:table-cell" style={{ fontWeight: 600 }}>Receitas</th>
                 )}
                 {reportType !== "income" && (
-                  <th className="text-right py-2 text-xs text-muted-foreground uppercase" style={{ fontWeight: 600 }}>Despesas</th>
+                  <th className="text-right py-2 text-xs text-muted-foreground uppercase hidden sm:table-cell" style={{ fontWeight: 600 }}>Despesas</th>
                 )}
                 {reportType === "all" && (
                   <th className="text-right py-2 text-xs text-muted-foreground uppercase" style={{ fontWeight: 600 }}>Saldo</th>
@@ -403,12 +443,12 @@ export function ReportsPage() {
                           {dateObj.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
                         </td>
                         {reportType !== "expense" && (
-                          <td className="py-2.5 text-sm text-primary text-right" style={{ fontWeight: 500 }}>
+                          <td className="py-2.5 text-sm text-primary text-right hidden sm:table-cell" style={{ fontWeight: 500 }}>
                             {day.income > 0 ? formatCurrency(day.income) : "-"}
                           </td>
                         )}
                         {reportType !== "income" && (
-                          <td className="py-2.5 text-sm text-red-500 text-right" style={{ fontWeight: 500 }}>
+                          <td className="py-2.5 text-sm text-red-500 text-right hidden sm:table-cell" style={{ fontWeight: 500 }}>
                             {day.expense > 0 ? formatCurrency(day.expense) : "-"}
                           </td>
                         )}
@@ -427,9 +467,11 @@ export function ReportsPage() {
       </div>
 
       {/* Period Info */}
-      <p className="text-xs text-muted-foreground mt-4 text-center">
-        Período: {new Date(startDate).toLocaleDateString("pt-BR")} a {new Date(endDate).toLocaleDateString("pt-BR")}
-      </p>
+      {formattedPeriodText && (
+        <p className="text-xs text-muted-foreground mt-4 text-center">
+          {formattedPeriodText}
+        </p>
+      )}
     </div>
   );
 }

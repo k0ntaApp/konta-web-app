@@ -248,11 +248,12 @@ export function IncomePage() {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-3 rounded-xl bg-primary dark:bg-primary text-white hover:bg-primary/90 dark:hover:bg-violet-600 transition-colors text-sm"
+          className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-3 rounded-xl bg-primary dark:bg-primary text-white hover:bg-primary/90 dark:hover:bg-violet-600 transition-colors text-xs sm:text-sm"
           style={{ fontWeight: 600 }}
         >
           <Plus className="w-4 h-4" />
-          Nova receita
+          <span className="hidden xs:inline">Nova receita</span>
+          <span className="inline xs:hidden">Nova</span>
         </button>
       </div>
 
@@ -348,7 +349,7 @@ export function IncomePage() {
       {/* Filters */}
       <div className="bg-card dark:bg-card rounded-2xl p-4 border border-border dark:border-white/[0.06] shadow-sm mb-4">
         <div className="flex flex-wrap gap-3">
-          <div className="relative flex-1 min-w-[160px]">
+          <div className="relative flex-1 min-w-[120px] sm:min-w-[160px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground dark:text-muted-foreground" />
             <input
               type="text"
@@ -361,7 +362,7 @@ export function IncomePage() {
           <select
             value={filterMonth}
             onChange={(e) => setFilterMonth(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-border dark:border-border bg-background dark:bg-background text-sm text-foreground dark:text-foreground focus:outline-none focus:border-primary"
+            className="flex-1 min-w-0 sm:flex-none px-3 py-2 rounded-xl border border-border dark:border-border bg-background dark:bg-background text-sm text-foreground dark:text-foreground focus:outline-none focus:border-primary"
           >
             <option value="">Todos os meses</option>
             {MONTHS_PT.map((m, i) => (
@@ -373,7 +374,7 @@ export function IncomePage() {
           <select
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-border dark:border-border bg-background dark:bg-background text-sm text-foreground dark:text-foreground focus:outline-none focus:border-primary"
+            className="flex-1 min-w-0 sm:flex-none px-3 py-2 rounded-xl border border-border dark:border-border bg-background dark:bg-background text-sm text-foreground dark:text-foreground focus:outline-none focus:border-primary"
           >
             {years.map((y) => (
               <option key={y} value={y}>

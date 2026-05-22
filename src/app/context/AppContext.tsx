@@ -332,19 +332,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const completeSetup = (newSetup: Setup) => setSetup(newSetup);
 
   const addExpense = (expense: Omit<Expense, 'id' | 'type'>) =>
-    setExpenses((prev) => [...prev, { ...expense, id: Date.now().toString(), type: 'expense' }]);
+    setExpenses((prev) => [...prev, { ...expense, id: `e${Date.now()}${Math.random().toString(36).substring(2, 7)}`, type: 'expense' }]);
   const editExpense = (id: string, expense: Omit<Expense, 'id' | 'type'>) =>
     setExpenses((prev) => prev.map((e) => (e.id === id ? { ...expense, id, type: 'expense' } : e)));
   const deleteExpense = (id: string) => setExpenses((prev) => prev.filter((e) => e.id !== id));
 
   const addIncome = (income: Omit<Income, 'id' | 'type'>) =>
-    setIncomes((prev) => [...prev, { ...income, id: Date.now().toString(), type: 'income' }]);
+    setIncomes((prev) => [...prev, { ...income, id: `i${Date.now()}${Math.random().toString(36).substring(2, 7)}`, type: 'income' }]);
   const editIncome = (id: string, income: Omit<Income, 'id' | 'type'>) =>
     setIncomes((prev) => prev.map((e) => (e.id === id ? { ...income, id, type: 'income' } : e)));
   const deleteIncome = (id: string) => setIncomes((prev) => prev.filter((e) => e.id !== id));
 
   const addGoal = (goal: Omit<Goal, 'id' | 'createdAt'>) =>
-    setGoals((prev) => [...prev, { ...goal, id: Date.now().toString(), createdAt: new Date().toISOString() }]);
+    setGoals((prev) => [...prev, { ...goal, id: `g${Date.now()}${Math.random().toString(36).substring(2, 7)}`, createdAt: new Date().toISOString() }]);
   const editGoal = (id: string, goal: Partial<Goal>) =>
     setGoals((prev) => prev.map((g) => (g.id === id ? { ...g, ...goal } : g)));
   const deleteGoal = (id: string) => setGoals((prev) => prev.filter((g) => g.id !== id));
@@ -352,13 +352,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setGoals((prev) => prev.map((g) => (g.id === id ? { ...g, currentAmount: Math.min(g.targetAmount, g.currentAmount + amount) } : g)));
 
   const addCustomCategory = (category: Omit<CustomCategory, 'id'>) =>
-    setCustomCategories((prev) => [...prev, { ...category, id: Date.now().toString() }]);
+    setCustomCategories((prev) => [...prev, { ...category, id: `c${Date.now()}${Math.random().toString(36).substring(2, 7)}` }]);
   const deleteCustomCategory = (id: string) =>
     setCustomCategories((prev) => prev.filter((c) => c.id !== id));
 
   const addMember = (member: Omit<Member, 'id'>) => {
     if (!setup) return;
-    setSetup({ ...setup, members: [...setup.members, { ...member, id: Date.now().toString() }] });
+    setSetup({ ...setup, members: [...setup.members, { ...member, id: `m${Date.now()}${Math.random().toString(36).substring(2, 7)}` }] });
   };
   const removeMember = (id: string) => {
     if (!setup) return;

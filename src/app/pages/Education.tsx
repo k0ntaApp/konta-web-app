@@ -424,7 +424,7 @@ export function EducationPage() {
       {/* Search & Filters */}
       <div className="bg-card dark:bg-card rounded-2xl p-4 border border-border dark:border-white/[0.06] shadow-sm mb-6">
         <div className="flex flex-wrap gap-3 mb-3">
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative flex-1 min-w-[120px] sm:min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground dark:text-muted-foreground" />
             <input
               type="text"

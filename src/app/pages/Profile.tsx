@@ -146,11 +146,11 @@ export function ProfilePage() {
       </div>
 
       {/* Profile card */}
-      <div className="bg-card dark:bg-card rounded-2xl p-6 border border-border dark:border-white/[0.06] shadow-sm mb-6">
-        <div className="flex items-center gap-5">
+      <div className="bg-card dark:bg-card rounded-2xl p-4 sm:p-6 border border-border dark:border-white/[0.06] shadow-sm mb-6">
+        <div className="flex items-center gap-4 sm:gap-5">
           <div className="relative flex-shrink-0">
             <div
-              className="w-20 h-20 rounded-2xl bg-primary dark:bg-primary flex items-center justify-center text-white text-2xl overflow-hidden cursor-pointer"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary dark:bg-primary flex items-center justify-center text-white text-xl sm:text-2xl overflow-hidden cursor-pointer"
               style={{ fontWeight: 700 }}
               onClick={() => fileInputRef.current?.click()}
             >
@@ -166,9 +166,9 @@ export function ProfilePage() {
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-card dark:bg-muted border-2 border-border dark:border-border flex items-center justify-center shadow-sm hover:border-primary dark:hover:border-violet-500 transition-colors"
+              className="absolute -bottom-1 -right-1 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-card dark:bg-muted border-2 border-border dark:border-border flex items-center justify-center shadow-sm hover:border-primary dark:hover:border-violet-500 transition-colors"
             >
-              <Camera className="w-4 h-4 text-muted-foreground dark:text-muted-foreground" />
+              <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground dark:text-muted-foreground" />
             </button>
             <input
               type="file"
@@ -178,14 +178,14 @@ export function ProfilePage() {
               onChange={handleAvatarUpload}
             />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h2
-              className="text-xl text-foreground dark:text-foreground"
+              className="text-lg sm:text-xl text-foreground dark:text-foreground truncate"
               style={{ fontWeight: 700 }}
             >
               {currentUser?.name}
             </h2>
-            <p className="text-muted-foreground dark:text-muted-foreground">
+            <p className="text-muted-foreground dark:text-muted-foreground text-sm truncate">
               {currentUser?.email}
             </p>
             <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
@@ -198,9 +198,9 @@ export function ProfilePage() {
                 : "hoje"}
             </p>
           </div>
-          <div className="ml-auto flex-shrink-0">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent dark:bg-muted">
-              <span className="text-primary dark:text-primary font-bold">K</span>
+          <div className="flex-shrink-0 self-start">
+            <div className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-accent dark:bg-muted">
+              <span className="text-primary dark:text-primary font-bold text-sm">K</span>
               <span
                 className="text-xs text-primary dark:text-primary"
                 style={{ fontWeight: 600 }}

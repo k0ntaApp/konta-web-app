@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useApp, Member } from "../context/AppContext";
 import { toast } from "sonner";
@@ -48,7 +48,7 @@ interface MemberForm {
 }
 
 export function SetupPage() {
-  const { currentUser, completeSetup } = useApp();
+  const { currentUser, completeSetup, addIncome } = useApp();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +57,12 @@ export function SetupPage() {
   const [profileType, setProfileType] = useState<"family" | "individual">(
     "family",
   );
+  
+  const steps = useMemo(() => {
+    return profileType === "individual"
+      ? ["Perfil", "Renda", "Metas", "Concluir"]
+      : ["Perfil", "Renda", "Membros", "Metas", "Concluir"];
+  }, [profileType]);
   const [householdName, setHouseholdName] = useState("");
   const [ownerAvatar, setOwnerAvatar] = useState<string | undefined>();
 
@@ -115,15 +121,16 @@ export function SetupPage() {
   };
 
   const nextStep = () => {
-    if (step === 0 && !householdName) {
-      toast.error("Digite o nome da família.");
+    const currentStepName = steps[step];
+    if (currentStepName === "Perfil" && !householdName) {
+      toast.error(profileType === "family" ? "Digite o nome da família." : "Digite seu nome de perfil.");
       return;
     }
-    if (step === 1 && !monthlyIncome) {
+    if (currentStepName === "Renda" && !monthlyIncome) {
       toast.error("Informe sua renda.");
       return;
     }
-    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    setStep((s) => Math.min(s + 1, steps.length - 1));
   };
 
   const handleFinish = () => {
@@ -140,11 +147,11 @@ export function SetupPage() {
     };
     const allMembers: Member[] = [
       ownerMember,
-      ...members.map((m, i) => ({
+      ...(profileType === "family" ? members.map((m, i) => ({
         ...m,
         id: `m${Date.now()}${i}`,
         isOwner: false,
-      })),
+      })) : []),
     ];
     completeSetup({
       profileType,
@@ -156,6 +163,35 @@ export function SetupPage() {
       hasVariableIncome,
       monthlyIncome: parseFloat(monthlyIncome) || 0,
     });
+
+    // Populate initial incomes for owner and members
+    const ownerIncomeVal = parseFloat(monthlyIncome) || 0;
+    if (ownerIncomeVal > 0) {
+      addIncome({
+        description: `Renda inicial - ${currentUser!.name}`,
+        amount: ownerIncomeVal,
+        category: "Salário",
+        date: new Date().toISOString(),
+        member: currentUser!.name,
+        isRecurring: true,
+      });
+    }
+
+    if (profileType === "family") {
+      members.forEach((m) => {
+        if (m.income > 0) {
+          addIncome({
+            description: `Renda inicial - ${m.name}`,
+            amount: m.income,
+            category: "Salário",
+            date: new Date().toISOString(),
+            member: m.name,
+            isRecurring: !m.isVariableIncome,
+          });
+        }
+      });
+    }
+
     toast.success("Configuração concluída!");
     navigate("/dashboard");
   };
@@ -177,19 +213,19 @@ export function SetupPage() {
         </div>
 
         {/* Step indicators */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center gap-1">
+        <div className="flex items-center justify-center gap-1 sm:gap-2 mb-8 overflow-x-auto pb-1">
+          {steps.map((s, i) => (
+            <div key={s} className="flex items-center gap-0.5 sm:gap-1">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs transition-all
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs transition-all flex-shrink-0
                 ${i < step ? "bg-primary text-white" : i === step ? "bg-primary text-white ring-4 ring-accent" : "bg-card border-2 border-border text-muted-foreground"}`}
                 style={{ fontWeight: 600 }}
               >
-                {i < step ? <Check className="w-4 h-4" /> : i + 1}
+                {i < step ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : i + 1}
               </div>
-              {i < STEPS.length - 1 && (
+              {i < steps.length - 1 && (
                 <div
-                  className={`w-8 h-0.5 ${i < step ? "bg-primary" : "bg-border"}`}
+                  className={`w-4 sm:w-8 h-0.5 ${i < step ? "bg-primary" : "bg-border"}`}
                 />
               )}
             </div>
@@ -198,7 +234,7 @@ export function SetupPage() {
 
         <div className="bg-card rounded-2xl shadow-sm border border-border p-8">
           {/* Step 0: Profile */}
-          {step === 0 && (
+          {steps[step] === "Perfil" && (
             <div className="space-y-6">
               <div className="text-center">
                 <h2
@@ -322,7 +358,7 @@ export function SetupPage() {
           )}
 
           {/* Step 1: Income */}
-          {step === 1 && (
+          {steps[step] === "Renda" && (
             <div className="space-y-6">
               <div className="text-center">
                 <h2
@@ -406,7 +442,7 @@ export function SetupPage() {
           )}
 
           {/* Step 2: Members */}
-          {step === 2 && (
+          {steps[step] === "Membros" && (
             <div className="space-y-4">
               <div className="text-center">
                 <h2
@@ -580,7 +616,7 @@ export function SetupPage() {
           )}
 
           {/* Step 3: Budget */}
-          {step === 3 && (
+          {steps[step] === "Metas" && (
             <div className="space-y-6">
               <div className="text-center">
                 <h2
@@ -603,7 +639,7 @@ export function SetupPage() {
                   <p className="text-sm text-muted-foreground mb-2">
                     Sugestão baseada na sua renda:
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1 sm:gap-2">
                     {[0.5, 0.6, 0.7].map((pct) => (
                       <button
                         key={pct}
@@ -612,14 +648,14 @@ export function SetupPage() {
                             ((parseFloat(monthlyIncome) || 0) * pct).toFixed(0),
                           )
                         }
-                        className={`p-3 rounded-lg text-center border-2 transition-all
+                        className={`p-2 sm:p-3 rounded-lg text-center border-2 transition-all
                           ${monthlyBudget === ((parseFloat(monthlyIncome) || 0) * pct).toFixed(0) ? "border-primary bg-card" : "border-border hover:border-primary/50"}`}
                       >
                         <p className="text-xs text-muted-foreground">
                           {(pct * 100).toFixed(0)}% da renda
                         </p>
                         <p
-                          className="text-sm text-foreground"
+                          className="text-xs sm:text-sm text-foreground truncate"
                           style={{ fontWeight: 600 }}
                         >
                           R${" "}
@@ -654,7 +690,7 @@ export function SetupPage() {
           )}
 
           {/* Step 4: Complete */}
-          {step === 4 && (
+          {steps[step] === "Concluir" && (
             <div className="text-center space-y-6 py-4">
               <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center mx-auto">
                 <Check className="w-10 h-10 text-primary" />
@@ -692,7 +728,7 @@ export function SetupPage() {
                 <div className="flex items-center gap-2 text-sm">
                   <Check className="w-4 h-4 text-primary" />
                   <span className="text-foreground">
-                    Membros: <strong>{members.length + 1} pessoa(s)</strong>
+                    Membros: <strong>{profileType === "individual" ? 1 : members.length + 1} pessoa(s)</strong>
                   </span>
                 </div>
                 {monthlyBudget && (
@@ -725,7 +761,7 @@ export function SetupPage() {
                 Voltar
               </button>
             )}
-            {step < STEPS.length - 1 ? (
+            {step < steps.length - 1 ? (
               <button
                 onClick={nextStep}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 transition-colors text-sm"

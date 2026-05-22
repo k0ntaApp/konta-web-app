@@ -558,12 +558,12 @@ export function GoalsPage() {
                 >
                   Categoria
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {GOAL_CATEGORIES.map(({ value, label, icon: Icon }) => (
                     <button
                       key={value}
                       onClick={() => setForm({ ...form, category: value })}
-                      className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all
+                      className={`flex flex-col items-center gap-1 p-2 sm:p-3 rounded-xl border-2 transition-all
                         ${
                           form.category === value
                             ? "border-primary dark:border-violet-500 bg-background dark:bg-muted"
@@ -592,7 +592,7 @@ export function GoalsPage() {
                     <button
                       key={c}
                       onClick={() => setForm({ ...form, color: c })}
-                      className={`w-10 h-10 rounded-full transition-all ${form.color === c ? "ring-2 ring-offset-2 ring-primary dark:ring-violet-500 scale-110" : "hover:scale-110"}`}
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all ${form.color === c ? "ring-2 ring-offset-2 ring-primary dark:ring-violet-500 scale-110" : "hover:scale-110"}`}
                       style={{ backgroundColor: c }}
                       title={c}
                       aria-label={`Cor ${c}`}
@@ -601,7 +601,7 @@ export function GoalsPage() {
                   {!showAllColors && (
                     <button
                       onClick={() => setShowAllColors(true)}
-                      className="w-10 h-10 rounded-full border-2 border-dashed border-border text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-dashed border-border text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center"
                     >
                       +{GOAL_COLORS.length - 4}
                     </button>
