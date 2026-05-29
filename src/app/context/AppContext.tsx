@@ -41,6 +41,8 @@ export interface Expense {
   member: string;
   members?: Array<{ name: string; amount: number }>;
   type: 'expense';
+  installments?: number;
+  installmentCurrent?: number;
 }
 
 export interface Income {
@@ -97,6 +99,7 @@ interface AppContextType {
   addExpense: (expense: Omit<Expense, 'id' | 'type'>) => void;
   editExpense: (id: string, expense: Omit<Expense, 'id' | 'type'>) => void;
   deleteExpense: (id: string) => void;
+  addInstallmentExpense: (expense: Omit<Expense, 'id' | 'type'>, installments: number) => void;
 
   // Incomes
   addIncome: (income: Omit<Income, 'id' | 'type'>) => void;
@@ -337,6 +340,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setExpenses((prev) => prev.map((e) => (e.id === id ? { ...expense, id, type: 'expense' } : e)));
   const deleteExpense = (id: string) => setExpenses((prev) => prev.filter((e) => e.id !== id));
 
+  const addInstallmentExpense = (expense: Omit<Expense, 'id' | 'type'>, installments: number) => {
+    const baseDate = new Date(expense.date);
+    const perInstallment = expense.amount / installments;
+    const newExpenses: Expense[] = [];
+    for (let i = 0; i < installments; i++) {
+      const installmentDate = new Date(
+        baseDate.getFullYear(),
+        baseDate.getMonth() + i,
+        baseDate.getDate()
+      );
+      newExpenses.push({
+        ...expense,
+        id: `e${Date.now()}${i}${Math.random().toString(36).substring(2, 7)}`,
+        type: 'expense',
+        description: `${expense.description} (${i + 1}/${installments})`,
+        amount: perInstallment,
+        date: installmentDate.toISOString(),
+        installments,
+        installmentCurrent: i + 1,
+      });
+    }
+    setExpenses((prev) => [...prev, ...newExpenses]);
+  };
+
   const addIncome = (income: Omit<Income, 'id' | 'type'>) =>
     setIncomes((prev) => [...prev, { ...income, id: `i${Date.now()}${Math.random().toString(36).substring(2, 7)}`, type: 'income' }]);
   const editIncome = (id: string, income: Omit<Income, 'id' | 'type'>) =>
@@ -385,7 +412,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       darkMode,
       login, register, logout, updateUserProfile,
       completeSetup,
-      addExpense, editExpense, deleteExpense,
+      addExpense, editExpense, deleteExpense, addInstallmentExpense,
       addIncome, editIncome, deleteIncome,
       addGoal, editGoal, deleteGoal, updateGoalProgress,
       addCustomCategory, deleteCustomCategory,

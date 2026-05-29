@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useApp, Expense } from "../context/AppContext";
 import { toast } from "sonner";
-import { Plus, Search, Trash2, Pencil, TrendingDown, X, ArrowUpDown, FolderPlus } from "lucide-react";
+import { Plus, Search, Trash2, Pencil, TrendingDown, X, ArrowUpDown, FolderPlus, CreditCard } from "lucide-react";
 import { CurrencyInput } from "../components/ui/CurrencyInput";
 import {
   AlertDialog,
@@ -47,16 +47,20 @@ function formatCurrency(v: number, compact = false) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+const INSTALLMENT_OPTIONS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24];
+
 interface ExpenseFormData {
   description: string;
   amount: string;
   category: string;
   date: string;
   member: string;
+  isInstallment: boolean;
+  installments: number;
 }
 
 export function ExpensesPage() {
-  const { expenses, addExpense, editExpense, deleteExpense, setup, customCategories, addCustomCategory, deleteCustomCategory } = useApp();
+  const { expenses, addExpense, editExpense, deleteExpense, addInstallmentExpense, setup, customCategories, addCustomCategory, deleteCustomCategory } = useApp();
   const now = new Date();
 
   const [search, setSearch] = useState("");
@@ -78,6 +82,8 @@ export function ExpensesPage() {
     category: "Alimentação",
     date: now.toISOString().split("T")[0],
     member: setup?.ownerName ?? "",
+    isInstallment: false,
+    installments: 2,
   });
 
   const customExpenseCategories = customCategories.filter(c => c.type === 'expense');
@@ -129,6 +135,8 @@ export function ExpensesPage() {
       category: "Alimentação",
       date: now.toISOString().split("T")[0],
       member: setup?.ownerName ?? "",
+      isInstallment: false,
+      installments: 2,
     });
     setFormErrors({});
     setModalStep(1);
@@ -143,6 +151,8 @@ export function ExpensesPage() {
       category: e.category,
       date: new Date(e.date).toISOString().split("T")[0],
       member: e.member,
+      isInstallment: false,
+      installments: 2,
     });
     setModalStep(1);
     setEditingId(e.id);
@@ -172,6 +182,9 @@ export function ExpensesPage() {
     if (editingId) {
       editExpense(editingId, data);
       toast.success("Despesa atualizada!");
+    } else if (form.isInstallment && form.installments >= 2) {
+      addInstallmentExpense(data, form.installments);
+      toast.success(`Despesa parcelada em ${form.installments}x adicionada!`);
     } else {
       addExpense(data);
       toast.success("Despesa adicionada!");
@@ -445,6 +458,12 @@ export function ExpensesPage() {
                       <p className="text-xs text-muted-foreground dark:text-muted-foreground md:hidden">
                         {expense.category}
                       </p>
+                      {expense.installments && (
+                        <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 mt-0.5" style={{ fontWeight: 500 }}>
+                          <CreditCard className="w-2.5 h-2.5" />
+                          {expense.installmentCurrent}/{expense.installments}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
                       <span
@@ -695,6 +714,64 @@ export function ExpensesPage() {
                       />
                     </div>
                   </div>
+
+                  {/* Installment toggle — only when adding new expense */}
+                  {!editingId && (
+                    <div>
+                      <button
+                        onClick={() => setForm({ ...form, isInstallment: !form.isInstallment })}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                          form.isInstallment
+                            ? "border-orange-400 dark:border-orange-500 bg-orange-50 dark:bg-orange-950/20"
+                            : "border-border dark:border-border hover:border-muted-foreground/30"
+                        }`}
+                      >
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          form.isInstallment ? "bg-orange-100 dark:bg-orange-900/30" : "bg-muted dark:bg-muted"
+                        }`}>
+                          <CreditCard className={`w-4 h-4 ${form.isInstallment ? "text-orange-500" : "text-muted-foreground"}`} />
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-sm ${form.isInstallment ? "text-orange-600 dark:text-orange-400" : "text-foreground"}`} style={{ fontWeight: 600 }}>
+                            Parcelado
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {form.isInstallment && parseFloat(form.amount) > 0
+                              ? `${form.installments}x de ${(parseFloat(form.amount) / form.installments).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
+                              : "Dividir em parcelas mensais"}
+                          </p>
+                        </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          form.isInstallment ? "border-orange-400 bg-orange-400" : "border-border"
+                        }`}>
+                          {form.isInstallment && <div className="w-2 h-2 rounded-full bg-white" />}
+                        </div>
+                      </button>
+
+                      {form.isInstallment && (
+                        <div className="mt-3">
+                          <label className="block text-sm text-foreground dark:text-foreground mb-2" style={{ fontWeight: 600 }}>
+                            Número de parcelas
+                          </label>
+                          <div className="flex gap-1.5 flex-wrap">
+                            {INSTALLMENT_OPTIONS.map((n) => (
+                              <button
+                                key={n}
+                                onClick={() => setForm({ ...form, installments: n })}
+                                className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all ${
+                                  form.installments === n
+                                    ? "bg-orange-500 text-white"
+                                    : "bg-muted dark:bg-muted text-muted-foreground hover:text-foreground"
+                                }`}
+                              >
+                                {n}x
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
               {modalStep === 2 && (
@@ -787,7 +864,11 @@ export function ExpensesPage() {
                     className="flex-1 py-3 rounded-xl bg-primary dark:bg-primary text-white hover:bg-primary/90 dark:hover:bg-violet-600 text-sm"
                     style={{ fontWeight: 600 }}
                   >
-                    {editingId ? "Salvar" : "Adicionar"}
+                    {editingId
+                      ? "Salvar"
+                      : form.isInstallment
+                      ? `Parcelar em ${form.installments}x`
+                      : "Adicionar"}
                   </button>
                 </>
               )}

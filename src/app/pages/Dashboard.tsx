@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useApp } from "../context/AppContext";
 import { Skeleton } from "../components/ui/skeleton";
 import { QuickAddFAB } from "../components/QuickAddFAB";
+import { QuickAddModal } from "../components/QuickAddModal";
 import {
   BarChart,
   Bar,
@@ -172,6 +173,7 @@ export function DashboardPage() {
   const [dashTab, setDashTab] = useState<"resumo" | "detalhes">("resumo");
   const [newMenuOpen, setNewMenuOpen] = useState(false);
   const [isLoading] = useState(false);
+  const [quickAddType, setQuickAddType] = useState<"expense" | "income" | null>(null);
 
   const currentMonthExpenses = useMemo(
     () =>
@@ -341,7 +343,7 @@ export function DashboardPage() {
               <div className="absolute right-0 mt-2 w-44 bg-card rounded-xl shadow-lg border border-border z-20 overflow-hidden sm:right-0 max-sm:right-auto max-sm:left-0">
                 <button
                   onClick={() => {
-                    navigate("/income");
+                    setQuickAddType("income");
                     setNewMenuOpen(false);
                   }}
                   className="flex items-center gap-2 w-full px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors"
@@ -351,7 +353,7 @@ export function DashboardPage() {
                 </button>
                 <button
                   onClick={() => {
-                    navigate("/expenses");
+                    setQuickAddType("expense");
                     setNewMenuOpen(false);
                   }}
                   className="flex items-center gap-2 w-full px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors"
@@ -847,6 +849,14 @@ export function DashboardPage() {
       </div>
 
       <QuickAddFAB />
+
+      {quickAddType && (
+        <QuickAddModal
+          type={quickAddType}
+          isOpen={true}
+          onClose={() => setQuickAddType(null)}
+        />
+      )}
     </div>
   );
 }
